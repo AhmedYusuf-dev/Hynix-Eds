@@ -1,0 +1,7 @@
+{
+  "name": "Hynix AI",
+  "description": "A next-generation AI assistant featuring advanced reasoning, real-time web grounding, and code execution capabilities.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
