@@ -25,11 +25,12 @@ const getModelConfig = (modelId: string) => {
   }
 
   // Specialized Useful AIs
-  if (modelId.includes("Research")) return { type: 'text', model: 'gemini-3-pro-preview', thinkingBudget: 0, tool: 'search' };
+  // NOTE: Switched Pro models to Flash to prevent 429 Resource Exhausted errors
+  if (modelId.includes("Research")) return { type: 'text', model: 'gemini-3-flash-preview', thinkingBudget: 0, tool: 'search' };
   if (modelId.includes("Travel")) return { type: 'text', model: 'gemini-2.5-flash', thinkingBudget: 0, tool: 'maps' };
-  if (modelId.includes("Reasoner")) return { type: 'text', model: 'gemini-3-pro-preview', thinkingBudget: 32768 };
+  if (modelId.includes("Reasoner")) return { type: 'text', model: 'gemini-3-flash-preview', thinkingBudget: 24000 };
   if (modelId.includes("Polyglot")) return { type: 'text', model: 'gemini-3-flash-preview', thinkingBudget: 0, instruction: 'translate' };
-  if (modelId.includes("Quantum")) return { type: 'text', model: 'gemini-3-pro-preview', thinkingBudget: 16000, instruction: 'stem' };
+  if (modelId.includes("Quantum")) return { type: 'text', model: 'gemini-3-flash-preview', thinkingBudget: 16000, instruction: 'stem' };
 
   // Hynix Text/Code Models
   let model = 'gemini-3-flash-preview'; 
@@ -45,12 +46,13 @@ const getModelConfig = (modelId: string) => {
           model = 'gemini-3-flash-preview';
           thinkingBudget = 16000; 
       } else {
-          // Pro: Max reasoning capability (25x Smarter)
-          model = 'gemini-3-pro-preview';
-          thinkingBudget = 32768; 
+          // Pro: Max reasoning capability
+          // Switched to Flash to avoid 429 errors
+          model = 'gemini-3-flash-preview';
+          thinkingBudget = 24000; 
       }
   } else if (modelId.includes("1.2") || modelId.includes("1.3")) {
-    model = 'gemini-3-pro-preview';
+    model = 'gemini-3-flash-preview'; // Switched to Flash
     // Optimized latency for 1.3
     if (modelId.includes("1.3")) thinkingBudget = 0; 
   } else {
@@ -439,7 +441,15 @@ export const streamCompletion = async (
         return; // Silent exit on abort
     }
     console.error("Hynix API Error:", error);
-    onChunk(`\n\n**System Error:** ${JSON.stringify(error.message || error)}`);
+    
+    let errorMessage = error.message || JSON.stringify(error);
+    
+    // Friendly error for quota exhaustion
+    if (errorMessage.includes("429") || errorMessage.includes("quota")) {
+        errorMessage = "The AI is currently at maximum capacity (Rate Limit Exceeded). Please try using a 'Flash' model or wait a minute before retrying.";
+    }
+
+    onChunk(`\n\n**System Error:** ${errorMessage}`);
   }
 };
 

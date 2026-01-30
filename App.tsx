@@ -781,8 +781,8 @@ export default function App() {
   // State to track if we have attempted to load from storage to prevent race conditions
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
 
-  // Default to Hynix 1.0 Pro
-  const [selectedModel, setSelectedModel] = useState<string>("Hynix 1.3 Pro");
+  // Default to Hynix 1.3 Flash for reliability
+  const [selectedModel, setSelectedModel] = useState<string>("Hynix 1.3 Flash");
 
   // Hynix 1.3 Pro specific options
   const [codeStyle, setCodeStyle] = useState<string>('Standard (PEP 8 / ES6)');
